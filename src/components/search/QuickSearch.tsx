@@ -1,12 +1,17 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import CaptchaField from "@/components/common/CaptchaField";
+import { useToast } from "@/components/ui/use-toast";
 
 const QuickSearch = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const recentSearches = [
     "ABC Corporation",
@@ -17,11 +22,25 @@ const QuickSearch = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isCaptchaValid) {
+      toast({
+        variant: "destructive",
+        title: "CAPTCHA verification required",
+        description: "Please verify the CAPTCHA before searching",
+      });
+      return;
+    }
+    
     if (searchQuery.trim()) {
       // In a real app, we would dispatch the search action here
       // For now, just navigate to the results page
       navigate(`/results?q=${encodeURIComponent(searchQuery)}`);
     }
+  };
+
+  const handleCaptchaValidated = (isValid: boolean) => {
+    setIsCaptchaValid(isValid);
   };
 
   return (
@@ -41,9 +60,14 @@ const QuickSearch = () => {
           />
         </div>
         
+        <div className="mt-4">
+          <CaptchaField onValidated={handleCaptchaValidated} />
+        </div>
+        
         <Button
           type="submit"
           className="mt-4 search-button w-full md:w-auto"
+          disabled={!isCaptchaValid}
         >
           Search Across All Databases
         </Button>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,10 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CaptchaField from "@/components/common/CaptchaField";
+import { useToast } from "@/components/ui/use-toast";
 
 const EntitySearch = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("individual");
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false);
+  const { toast } = useToast();
   
   const [individualData, setIndividualData] = useState({
     name: "",
@@ -38,8 +41,22 @@ const EntitySearch = () => {
     });
   };
 
+  const handleCaptchaValidated = (isValid: boolean) => {
+    setIsCaptchaValid(isValid);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isCaptchaValid) {
+      toast({
+        variant: "destructive",
+        title: "CAPTCHA verification required",
+        description: "Please verify the CAPTCHA before searching",
+      });
+      return;
+    }
+    
     // In a real app, we would dispatch the search action here
     // For now, just navigate to the results page
     navigate("/results?type=entity");
@@ -112,8 +129,16 @@ const EntitySearch = () => {
                 </div>
               </div>
               
+              <div className="mt-4">
+                <CaptchaField onValidated={handleCaptchaValidated} />
+              </div>
+              
               <div className="pt-4 flex justify-end">
-                <Button type="submit" className="bg-navy-800 hover:bg-navy-700">
+                <Button 
+                  type="submit" 
+                  className="bg-navy-800 hover:bg-navy-700"
+                  disabled={!isCaptchaValid}
+                >
                   Search
                 </Button>
               </div>
@@ -173,8 +198,16 @@ const EntitySearch = () => {
                 </div>
               </div>
               
+              <div className="mt-4">
+                <CaptchaField onValidated={handleCaptchaValidated} />
+              </div>
+              
               <div className="pt-4 flex justify-end">
-                <Button type="submit" className="bg-navy-800 hover:bg-navy-700">
+                <Button 
+                  type="submit" 
+                  className="bg-navy-800 hover:bg-navy-700"
+                  disabled={!isCaptchaValid}
+                >
                   Search
                 </Button>
               </div>
