@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EntitySearch from "@/components/search/EntitySearch";
 import PropertySearch from "@/components/search/PropertySearch";
+import TransactionSearch from "@/components/search/TransactionSearch";
+import DocumentSearch from "@/components/search/DocumentSearch";
 
 const SearchPage = () => {
   const [activeTab, setActiveTab] = useState("entity");
@@ -34,29 +36,11 @@ const SearchPage = () => {
         </TabsContent>
         
         <TabsContent value="transaction">
-          <Card className="w-full max-w-4xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-navy-800">Transaction-Based Search</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Transaction search form is under development. Please check back later.
-              </p>
-            </CardContent>
-          </Card>
+          <TransactionSearch />
         </TabsContent>
         
         <TabsContent value="document">
-          <Card className="w-full max-w-4xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-navy-800">Document-Based Search</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Document search form is under development. Please check back later.
-              </p>
-            </CardContent>
-          </Card>
+          <DocumentSearch />
         </TabsContent>
       </Tabs>
       
