@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -88,7 +87,7 @@ const ResultCard = ({
       
       <CardFooter className="pt-0 px-4 pb-2 flex justify-end">
         <Link to={`/details/${type}/${id}`}>
-          <Button variant="outline" size="sm" className="text-navy-800 hover:bg-navy-50">
+          <Button variant="outline" size="sm" className="text-navy-800 hover:bg-gray-500">
             <Eye size={16} className="mr-1" />
             View Details
           </Button>

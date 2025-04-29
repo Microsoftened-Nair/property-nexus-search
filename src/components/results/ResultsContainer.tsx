@@ -12,6 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import ResultCard from "./ResultCard";
 
+const sourceOptions = ["MCA", "CERSAI", "DORIS"];
+const typeOptions = ["entity", "property", "transaction", "document"];
+const dateOptions = ["last-month", "last-quarter", "last-year", "custom"];
+
 const ResultsContainer = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
@@ -22,6 +26,10 @@ const ResultsContainer = () => {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [filtersApplied, setFiltersApplied] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -32,7 +40,62 @@ const ResultsContainer = () => {
       .finally(() => setLoading(false));
   }, [query, activeTab]);
 
-  const filteredResults = results;
+  // Checkbox handlers
+  const handleSourceChange = (source: string) => {
+    setSelectedSources((prev) =>
+      prev.includes(source) ? prev.filter((s) => s !== source) : [...prev, source]
+    );
+  };
+  const handleTypeChange = (type: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
+  const handleDateChange = (date: string) => {
+    setSelectedDates((prev) =>
+      prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
+    );
+  };
+
+  // Date filter logic (simple demo, can be improved)
+  function filterByDate(result: any) {
+    if (selectedDates.length === 0) return true;
+    if (!result.date) return false;
+    const dateStr = result.date.match(/\d{1,2} \w{3} \d{4}/)?.[0];
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
+    const now = new Date();
+    for (const d of selectedDates) {
+      if (d === "last-month") {
+        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        if (date > lastMonth) return true;
+      } else if (d === "last-quarter") {
+        const lastQuarter = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+        if (date > lastQuarter) return true;
+      } else if (d === "last-year") {
+        const lastYear = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        if (date > lastYear) return true;
+      } else if (d === "custom") {
+        // Custom range logic can be added here
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Apply filters
+  const applyFilters = () => {
+    setFiltersApplied(true);
+  };
+
+  // Filtered results
+  const filteredResults = results.filter((result) => {
+    if (!filtersApplied) return true;
+    const sourceMatch = selectedSources.length === 0 || selectedSources.includes(result.source);
+    const typeMatch = selectedTypes.length === 0 || selectedTypes.includes(result.type);
+    const dateMatch = filterByDate(result);
+    return sourceMatch && typeMatch && dateMatch;
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -71,18 +134,12 @@ const ResultsContainer = () => {
             <div>
               <h4 className="font-medium mb-3">Data Source</h4>
               <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="mca" />
-                  <Label htmlFor="mca">MCA (3)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="cersai" />
-                  <Label htmlFor="cersai">CERSAI (1)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="doris" />
-                  <Label htmlFor="doris">DORIS (2)</Label>
-                </div>
+                {sourceOptions.map((source) => (
+                  <div className="flex items-center space-x-2" key={source}>
+                    <Checkbox id={source.toLowerCase()} checked={selectedSources.includes(source)} onCheckedChange={() => handleSourceChange(source)} />
+                    <Label htmlFor={source.toLowerCase()}>{source}</Label>
+                  </div>
+                ))}
               </div>
             </div>
             
@@ -92,22 +149,12 @@ const ResultsContainer = () => {
             <div>
               <h4 className="font-medium mb-3">Result Type</h4>
               <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="entity" />
-                  <Label htmlFor="entity">Entities (2)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="property" />
-                  <Label htmlFor="property">Properties (1)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="transaction" />
-                  <Label htmlFor="transaction">Transactions (1)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="document" />
-                  <Label htmlFor="document">Documents (1)</Label>
-                </div>
+                {typeOptions.map((type) => (
+                  <div className="flex items-center space-x-2" key={type}>
+                    <Checkbox id={type} checked={selectedTypes.includes(type)} onCheckedChange={() => handleTypeChange(type)} />
+                    <Label htmlFor={type}>{type.charAt(0).toUpperCase() + type.slice(1)}s</Label>
+                  </div>
+                ))}
               </div>
             </div>
             
@@ -117,27 +164,22 @@ const ResultsContainer = () => {
             <div>
               <h4 className="font-medium mb-3">Last Updated</h4>
               <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="last-month" />
-                  <Label htmlFor="last-month">Last month</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="last-quarter" />
-                  <Label htmlFor="last-quarter">Last 3 months</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="last-year" />
-                  <Label htmlFor="last-year">Last year</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="custom" />
-                  <Label htmlFor="custom">Custom range</Label>
-                </div>
+                {dateOptions.map((date) => (
+                  <div className="flex items-center space-x-2" key={date}>
+                    <Checkbox id={date} checked={selectedDates.includes(date)} onCheckedChange={() => handleDateChange(date)} />
+                    <Label htmlFor={date}>
+                      {date === "last-month" && "Last month"}
+                      {date === "last-quarter" && "Last 3 months"}
+                      {date === "last-year" && "Last year"}
+                      {date === "custom" && "Custom range"}
+                    </Label>
+                  </div>
+                ))}
               </div>
             </div>
             
             <div className="pt-2">
-              <Button variant="outline" className="w-full">Apply Filters</Button>
+              <Button variant="outline" className="w-full" onClick={applyFilters}>Apply Filters</Button>
             </div>
           </CardContent>
         </Card>
