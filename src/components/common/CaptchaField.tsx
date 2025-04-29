@@ -84,6 +84,7 @@ const CaptchaField: React.FC<CaptchaFieldProps> = ({ onValidated }) => {
           onClick={handleValidateCaptcha} 
           type="button"
           variant="outline"
+          className="text-navy-800 border-gray-400"
         >
           Verify
         </Button>

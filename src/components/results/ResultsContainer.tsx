@@ -1,6 +1,6 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { fetchSearchResults } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,73 +12,34 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import ResultCard from "./ResultCard";
 
-// Mock data for demonstration
-const mockResults = [
-  {
-    id: "1",
-    type: "entity",
-    title: "ABC Corporation Ltd.",
-    subtitle: "CIN: L12345MH2000PLC123456",
-    description: "Incorporated on January 15, 2000. Active status with authorized capital of ₹10,00,000.",
-    source: "MCA",
-    date: "Updated on 12 Mar 2025"
-  },
-  {
-    id: "2",
-    type: "property",
-    title: "Commercial Property - Mumbai",
-    subtitle: "Registration #: PROP12345",
-    description: "Commercial property located in Andheri East, Mumbai. Total area 1,500 sq.ft. Registered on December 5, 2022.",
-    source: "DORIS",
-    date: "Updated on 5 Dec 2022"
-  },
-  {
-    id: "3",
-    type: "transaction",
-    title: "Mortgage Registration",
-    subtitle: "Security Interest ID: SEC98765",
-    description: "Mortgage created in favor of XYZ Bank Ltd. on property located at 123, Main Street, Pune.",
-    source: "CERSAI",
-    date: "Updated on 23 Jun 2024"
-  },
-  {
-    id: "4",
-    type: "document",
-    title: "Sale Deed",
-    subtitle: "Document #: DOC45678",
-    description: "Sale deed executed between Mr. John Doe and Ms. Jane Smith for residential property in Bangalore.",
-    source: "DORIS",
-    date: "Updated on 18 Apr 2023"
-  },
-  {
-    id: "5",
-    type: "entity",
-    title: "XYZ Enterprises LLP",
-    subtitle: "LLPIN: AAA-0000",
-    description: "Limited Liability Partnership established in 2019. Active status with 3 partners.",
-    source: "MCA",
-    date: "Updated on 2 Feb 2025"
-  },
-];
-
 const ResultsContainer = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const type = searchParams.get("type") || "all";
-  
+
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [activeTab, setActiveTab] = useState<string>("all");
-  
-  const filteredResults = activeTab === "all" 
-    ? mockResults 
-    : mockResults.filter(result => result.type === activeTab);
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetchSearchResults(query, activeTab)
+      .then(setResults)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [query, activeTab]);
+
+  const filteredResults = results;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-navy-800">Search Results</h2>
         <p className="text-muted-foreground">
-          {query ? `Showing results for "${query}"` : `Showing ${type} search results`} • {mockResults.length} results found
+          {query ? `Showing results for "${query}"` : `Showing ${type} search results`} • {filteredResults.length} results found
         </p>
       </div>
       
@@ -227,26 +188,32 @@ const ResultsContainer = () => {
             </CardHeader>
             
             <CardContent>
-              <div className={`${viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-2"}`}>
-                {filteredResults.map((result) => (
-                  <ResultCard
-                    key={result.id}
-                    id={result.id}
-                    type={result.type as any}
-                    title={result.title}
-                    subtitle={result.subtitle}
-                    description={result.description}
-                    source={result.source as any}
-                    date={result.date}
-                  />
-                ))}
-                
-                {filteredResults.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No results found. Try adjusting your filters.</p>
-                  </div>
-                )}
-              </div>
+              {loading ? (
+                <div className="text-center py-8">Loading...</div>
+              ) : error ? (
+                <div className="text-center py-8 text-red-500">{error}</div>
+              ) : (
+                <div className={`${viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-2"}`}>
+                  {filteredResults.map((result) => (
+                    <ResultCard
+                      key={result.id}
+                      id={result.id}
+                      type={result.type as any}
+                      title={result.title}
+                      subtitle={result.subtitle}
+                      description={result.description}
+                      source={result.source as any}
+                      date={result.date}
+                    />
+                  ))}
+                  
+                  {filteredResults.length === 0 && !loading && !error && (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No results found. Try adjusting your filters.</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

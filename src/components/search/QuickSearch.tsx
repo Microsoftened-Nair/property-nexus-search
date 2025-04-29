@@ -49,7 +49,7 @@ const QuickSearch = () => {
         <div className="relative">
           <input
             type="text"
-            className="search-input pl-12 padding-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            className="search-input pl-12 padding-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-navy-800"
             placeholder="Search by name, company, property, registration number..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
