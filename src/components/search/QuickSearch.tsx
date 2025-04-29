@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
@@ -31,13 +30,13 @@ const QuickSearch = () => {
         <div className="relative">
           <input
             type="text"
-            className="search-input pl-12"
+            className="search-input pl-12 padding-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             placeholder="Search by name, company, property, registration number..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <Search
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 text-muted-foreground"
             size={20}
           />
         </div>
@@ -74,28 +73,28 @@ const QuickSearch = () => {
       <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
         <Button
           variant="outline"
-          className="border-navy-300 hover:bg-navy-50"
+          className="border-navy-300 hover:bg-navy-800 text-navy-800"
           onClick={() => navigate("/search/entity")}
         >
           Entity Search
         </Button>
         <Button
           variant="outline"
-          className="border-navy-300 hover:bg-navy-50"
+          className="border-navy-300 hover:bg-navy-800 text-navy-800"
           onClick={() => navigate("/search/property")}
         >
           Property Search
         </Button>
         <Button
           variant="outline"
-          className="border-navy-300 hover:bg-navy-50"
+          className="border-navy-300 hover:bg-navy-800 text-navy-800"
           onClick={() => navigate("/search/transaction")}
         >
           Transaction Search
         </Button>
         <Button
           variant="outline"
-          className="border-navy-300 hover:bg-navy-50"
+          className="border-navy-300 hover:bg-navy-800 text-navy-800"
           onClick={() => navigate("/search/document")}
         >
           Document Search
