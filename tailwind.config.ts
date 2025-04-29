@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,31 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom colors for property portal
+				navy: {
+					50: '#f0f4fa',
+					100: '#dae3f3',
+					200: '#bccaea',
+					300: '#92a8da',
+					400: '#6882c7',
+					500: '#4a65b3',
+					600: '#3a5095',
+					700: '#304079',
+					800: '#1a365d', // Main navy
+					900: '#172e4d'
+				},
+				teal: {
+					50: '#e6fcfc',
+					100: '#c3f9f7',
+					200: '#9aeef1',
+					300: '#67dfe7',
+					400: '#36c2d0',
+					500: '#2c7a7b', // Main teal
+					600: '#1d686f',
+					700: '#175458',
+					800: '#144147',
+					900: '#12353b'
 				}
 			},
 			borderRadius: {
@@ -84,11 +110,20 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0'
+					},
+					'100%': {
+						opacity: '1'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out'
 			}
 		}
 	},
