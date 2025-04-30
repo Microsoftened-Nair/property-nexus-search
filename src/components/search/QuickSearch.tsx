@@ -16,8 +16,8 @@ const QuickSearch = () => {
   const recentSearches = [
     "ABC Corporation",
     "123 Main Street",
-    "PAN ABCDE1234F",
-    "CIN L12345MH2000PLC123456",
+    "ABCDE1234F",
+    "L12345MH2000PLC123456",
   ];
 
   const handleSearch = (e: React.FormEvent) => {
