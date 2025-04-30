@@ -17,6 +17,7 @@ const EntitySearch = () => {
   
   const [individualData, setIndividualData] = useState({
     name: "",
+    idType: "",
     identificationNumber: "",
     contactInfo: ""
   });
@@ -24,7 +25,8 @@ const EntitySearch = () => {
   const [corporateData, setCorporateData] = useState({
     companyName: "",
     cinNumber: "",
-    directorDetails: ""
+    directorDetails: "",
+    companyStatus: ""
   });
 
   const handleIndividualChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,6 +41,15 @@ const EntitySearch = () => {
       ...corporateData,
       [e.target.name]: e.target.value
     });
+  };
+
+  // Add handler for idType select
+  const handleIdTypeChange = (value: string) => {
+    setIndividualData((prev) => ({ ...prev, idType: value }));
+  };
+  // Add handler for companyStatus select
+  const handleCompanyStatusChange = (value: string) => {
+    setCorporateData((prev) => ({ ...prev, companyStatus: value }));
   };
 
   const handleCaptchaValidated = (isValid: boolean) => {
@@ -57,9 +68,24 @@ const EntitySearch = () => {
       return;
     }
     
-    // In a real app, we would dispatch the search action here
-    // For now, just navigate to the results page
-    navigate("/results?type=entity");
+    // Build query params for advanced search
+    let params = new URLSearchParams();
+    if (activeTab === "individual") {
+      if (individualData.name) params.append("name", individualData.name);
+      // ID Type is a select, needs to be tracked in state
+      if ((individualData as any).idType) params.append("idType", (individualData as any).idType);
+      if (individualData.identificationNumber) params.append("identificationNumber", individualData.identificationNumber);
+      if (individualData.contactInfo) params.append("contactInfo", individualData.contactInfo);
+    } else if (activeTab === "corporate") {
+      if (corporateData.companyName) params.append("companyName", corporateData.companyName);
+      if (corporateData.cinNumber) params.append("cinNumber", corporateData.cinNumber);
+      if (corporateData.directorDetails) params.append("directorDetails", corporateData.directorDetails);
+      // Company status is a select, needs to be tracked in state
+      if ((corporateData as any).companyStatus && (corporateData as any).companyStatus !== 'any') params.append("companyStatus", (corporateData as any).companyStatus);
+    }
+    // Navigate to results with type=entity and all params
+    const paramString = params.toString();
+    navigate(`/results?type=entity${paramString ? `&${paramString}` : ''}`);
   };
 
   return (
@@ -91,7 +117,7 @@ const EntitySearch = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="idType">ID Type</Label>
-                  <Select>
+                  <Select value={individualData.idType} onValueChange={handleIdTypeChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select ID type" />
                     </SelectTrigger>
@@ -183,7 +209,7 @@ const EntitySearch = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="companyStatus">Company Status</Label>
-                  <Select>
+                  <Select value={corporateData.companyStatus} onValueChange={handleCompanyStatusChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>

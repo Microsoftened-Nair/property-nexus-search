@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { fetchSearchResults } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,8 +18,24 @@ const dateOptions = ["last-month", "last-quarter", "last-year", "custom"];
 
 const ResultsContainer = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const query = searchParams.get("q") || "";
   const type = searchParams.get("type") || "all";
+
+  // Helper: parse all params for entity search
+  function getEntitySearchParams() {
+    const params = new URLSearchParams(location.search);
+    const allowed = [
+      "name", "idType", "identificationNumber", "contactInfo",
+      "companyName", "cinNumber", "directorDetails", "companyStatus"
+    ];
+    let obj: Record<string, string> = {};
+    for (const key of allowed) {
+      const val = params.get(key);
+      if (val) obj[key] = val;
+    }
+    return obj;
+  }
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -34,11 +50,36 @@ const ResultsContainer = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetchSearchResults(query, activeTab)
-      .then(setResults)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [query, activeTab]);
+    // If entity search, use /api/entities/search with all params
+    if (type === "entity") {
+      const params = getEntitySearchParams();
+      let url = "/api/entities/search";
+      const paramString = new URLSearchParams(params).toString();
+      if (paramString) url += `?${paramString}`;
+      fetch(url)
+        .then(async (res) => {
+          if (!res.ok) throw new Error("Failed to fetch entity search results");
+          const text = await res.text();
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            setError("Invalid JSON response from backend. Raw response: " + text);
+            console.error("Raw response from backend:", text);
+            throw new Error("Invalid JSON response from backend");
+          }
+        })
+        .then(setResults)
+        .catch((e) => {
+          if (!error) setError(e.message);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      fetchSearchResults(query, activeTab)
+        .then(setResults)
+        .catch((e) => setError(e.message))
+        .finally(() => setLoading(false));
+    }
+  }, [query, activeTab, location.search, type]);
 
   // Checkbox handlers
   const handleSourceChange = (source: string) => {
