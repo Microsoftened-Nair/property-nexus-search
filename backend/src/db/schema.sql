@@ -60,6 +60,22 @@ CREATE TABLE searches (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Unified records table for normalized/aggregated data
+CREATE TABLE IF NOT EXISTS unified_records (
+    id TEXT PRIMARY KEY,
+    type TEXT,
+    title TEXT,
+    description TEXT,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    owner TEXT,
+    date TIMESTAMP,
+    source TEXT,
+    raw JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indices for performance
 CREATE INDEX idx_entities_name ON entities(name);
 CREATE INDEX idx_entities_pan ON entities(pan);

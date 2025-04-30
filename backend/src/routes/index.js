@@ -8,6 +8,7 @@ const propertyRouter = require('./properties');
 const transactionRouter = require('./transactions');
 const documentRouter = require('./documents');
 const searchesRouter = require('./searches');
+const unifiedRouter = require('./unified');
 
 // Register routes
 router.use('/search', searchRouter);
@@ -16,5 +17,6 @@ router.use('/properties', propertyRouter);
 router.use('/transactions', transactionRouter);
 router.use('/documents', documentRouter);
 router.use('/searches', searchesRouter);
+router.use('/unified', unifiedRouter);
 
 module.exports = router;
