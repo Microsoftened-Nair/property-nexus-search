@@ -264,6 +264,22 @@ const DetailPage = () => {
                             <dt className="text-sm text-muted-foreground">Paid Up Capital</dt>
                             <dd>{detail.paidUpCapital}</dd>
                           </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">ID Type</dt>
+                            <dd>{detail.id_type || "-"}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Identification Number</dt>
+                            <dd>{detail.identification_number || "-"}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Director Details</dt>
+                            <dd>{detail.director_details || "-"}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Company Status</dt>
+                            <dd>{detail.company_status || detail.status || "-"}</dd>
+                          </div>
                         </dl>
                       </TabsContent>
                       
@@ -346,6 +362,18 @@ const DetailPage = () => {
                           <div>
                             <dt className="text-sm text-muted-foreground">Current Owner</dt>
                             <dd>{detail.currentOwner}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Registration Number</dt>
+                            <dd>{detail.registrationNumber || detail.registration_number || "-"}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Survey/Khasra Number</dt>
+                            <dd>{detail.surveyNumber || detail.survey_number || "-"}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">District</dt>
+                            <dd>{detail.district || "-"}</dd>
                           </div>
                         </dl>
                       </TabsContent>
@@ -443,6 +471,14 @@ const DetailPage = () => {
                               </Badge>
                             </dd>
                           </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Description</dt>
+                            <dd>{detail.description || "-"}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Party Name</dt>
+                            <dd>{detail.party_name || "-"}</dd>
+                          </div>
                         </dl>
                       </TabsContent>
                       
@@ -531,6 +567,14 @@ const DetailPage = () => {
                           <div>
                             <dt className="text-sm text-muted-foreground">Registration Fee</dt>
                             <dd>{detail.registrationFee}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Registration Office</dt>
+                            <dd>{detail.registration_office || "-"}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Filed By</dt>
+                            <dd>{detail.filed_by || "-"}</dd>
                           </div>
                         </dl>
                       </TabsContent>
