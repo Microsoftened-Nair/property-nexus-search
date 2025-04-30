@@ -26,7 +26,7 @@ const Header = () => {
           <Link to="/dashboard" className="text-navy-800 hover:text-navy-600 font-medium">Dashboard</Link>
         </nav>
 
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <Button 
             variant="outline" 
             className="border-navy-800 text-navy-800 hover:bg-navy-100"
@@ -36,7 +36,7 @@ const Header = () => {
           <Button className="bg-navy-800 text-white hover:bg-navy-700">
             Register
           </Button>
-        </div>
+        </div> */}
       </div>
     </header>
   );

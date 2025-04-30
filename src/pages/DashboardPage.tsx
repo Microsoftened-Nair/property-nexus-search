@@ -1,11 +1,41 @@
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Download, Search, Filter } from "lucide-react";
+import { fetchRecentSearches } from "@/services/dashboard";
+import { useNavigate } from "react-router-dom";
 
 const DashboardPage = () => {
+  const [recentSearches, setRecentSearches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setLoading(true);
+    fetchRecentSearches(5)
+      .then(setRecentSearches)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Helper to build a search URL from a recent search
+  function getSearchUrl(search: any) {
+    if (!search) return "/results";
+    // If query is a string, treat as general search
+    if (typeof search.query === "string") {
+      return `/results?q=${encodeURIComponent(search.query)}`;
+    }
+    // If query is an object, try to build a type-specific search
+    if (search.type && search.query) {
+      // Try to extract a main value for display/search
+      const q = search.query.q || search.query.name || search.query.address || search.query.cin || search.query.pan || "";
+      return `/results?q=${encodeURIComponent(q)}&type=${encodeURIComponent(search.type)}`;
+    }
+    return "/results";
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -21,14 +51,14 @@ const DashboardPage = () => {
             <CardTitle className="text-lg">Recent Searches</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">12</p>
+            <p className="text-3xl font-bold">{recentSearches.length}</p>
             <p className="text-sm text-muted-foreground">
               in the last 7 days
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        {/* <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Saved Results</CardTitle>
           </CardHeader>
@@ -38,7 +68,7 @@ const DashboardPage = () => {
               across all categories
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
         
         <Card>
           <CardHeader className="pb-2">
@@ -56,8 +86,8 @@ const DashboardPage = () => {
       <Tabs defaultValue="recent">
         <TabsList>
           <TabsTrigger value="recent">Recent Searches</TabsTrigger>
-          <TabsTrigger value="saved">Saved Items</TabsTrigger>
-          <TabsTrigger value="alerts">Alerts</TabsTrigger>
+          {/* <TabsTrigger value="saved">Saved Items</TabsTrigger> */}
+          {/* <TabsTrigger value="alerts">Alerts</TabsTrigger> */}
         </TabsList>
         
         <TabsContent value="recent" className="pt-6">
@@ -65,51 +95,54 @@ const DashboardPage = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Your Recent Search Activity</CardTitle>
-                <Button variant="outline" size="sm">
-                  <Filter size={14} className="mr-1" /> Filter
-                </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map((idx) => (
-                  <Card key={idx} className="bg-muted/50">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <Search size={16} className="text-muted-foreground" />
-                            <h4 className="font-medium">
-                              {idx % 2 === 0 
-                                ? "Entity Search" 
-                                : idx % 3 === 0 
-                                  ? "Property Search" 
-                                  : "Document Search"
-                              }
-                            </h4>
+              {loading ? (
+                <div className="text-center py-8">Loading...</div>
+              ) : error ? (
+                <div className="text-center py-8 text-red-500">{error}</div>
+              ) : (
+                <div className="space-y-4">
+                  {recentSearches.length === 0 && (
+                    <div className="text-center text-muted-foreground py-8">No recent searches found.</div>
+                  )}
+                  {recentSearches.map((search) => (
+                    <Card key={search.id} className="bg-muted/50">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <Search size={16} className="text-muted-foreground" />
+                              <h4 className="font-medium">
+                                {search.type ? `${search.type.charAt(0).toUpperCase() + search.type.slice(1)} Search` : "Search"}
+                              </h4>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {typeof search.query === "string"
+                                ? search.query
+                                : JSON.stringify(search.query)}
+                            </p>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {idx % 2 === 0 
-                              ? "ABC Corporation, CIN: L12345MH2000PLC123456" 
-                              : idx % 3 === 0 
-                                ? "Property in Mumbai, Registration #: PROP12345" 
-                                : "Sale Deed, Document #: DOC45678"
-                            }
-                          </p>
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">
+                              {search.created_at ? new Date(search.created_at).toLocaleString() : ""}
+                            </p>
+                            <Button 
+                              variant="link" 
+                              size="sm" 
+                              className="h-6 px-0" 
+                              onClick={() => navigate(getSearchUrl(search))}
+                            >
+                              Run again
+                            </Button>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">
-                            {`${idx} ${idx === 1 ? 'hour' : 'hours'} ago`}
-                          </p>
-                          <Button variant="link" size="sm" className="h-6 px-0">
-                            Run again
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

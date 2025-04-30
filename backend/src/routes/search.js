@@ -117,7 +117,7 @@ router.get('/', async (req, res) => {
     // Log search query
     await pool.query(
       'INSERT INTO searches (query, type) VALUES ($1, $2)',
-      [query, 'general']
+      [JSON.stringify({ q: query }), 'general']
     ).catch(err => console.error('Error logging search:', err));
     
     return res.json(results);
