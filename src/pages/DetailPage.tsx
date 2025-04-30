@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,120 +8,49 @@ import { Download, Printer, Share } from "lucide-react";
 // @ts-ignore
 import html2pdf from "html2pdf.js/dist/html2pdf.min.js";
 
-const entityDetail = {
-  id: "1",
-  name: "ABC Corporation Ltd.",
-  cin: "L12345MH2000PLC123456",
-  type: "Public Limited Company",
-  status: "Active",
-  incorporationDate: "15 January 2000",
-  registeredAddress: "123, Corporate Park, Andheri East, Mumbai - 400069, Maharashtra",
-  email: "contact@abccorp.com",
-  authorizedCapital: "₹10,00,000",
-  paidUpCapital: "₹8,50,000",
-  directors: [
-    { name: "John Doe", din: "00123456", designation: "Managing Director" },
-    { name: "Jane Smith", din: "00123457", designation: "Director" },
-  ],
-  filings: [
-    { document: "Annual Return", year: "2024", date: "15 April 2024", status: "Filed" },
-    { document: "Balance Sheet", year: "2024", date: "15 April 2024", status: "Filed" },
-    { document: "Annual Return", year: "2023", date: "20 April 2023", status: "Filed" },
-  ],
-  source: "MCA"
-};
-
-const propertyDetail = {
-  id: "2",
-  address: "Shop No. 101, First Floor, Market Complex, Andheri East, Mumbai - 400069, Maharashtra",
-  registrationNumber: "PROP12345",
-  type: "Commercial",
-  area: "1,500 sq.ft.",
-  registrationDate: "05 December 2022",
-  currentOwner: "ABC Corporation Ltd.",
-  previousOwners: [
-    { name: "XYZ Enterprises", period: "2015-2022" },
-    { name: "John Doe", period: "2010-2015" }
-  ],
-  encumbrances: [
-    { type: "Mortgage", holder: "XYZ Bank Ltd.", amount: "₹50,00,000", date: "10 December 2022" }
-  ],
-  transactions: [
-    { type: "Sale", date: "05 December 2022", parties: "XYZ Enterprises to ABC Corporation Ltd.", value: "₹1,25,00,000" }
-  ],
-  source: "DORIS"
-};
-
-const transactionDetail = {
-  id: "3",
-  type: "Mortgage",
-  registrationNumber: "SEC98765",
-  date: "23 June 2024",
-  borrower: "ABC Corporation Ltd.",
-  lender: "XYZ Bank Ltd.",
-  amount: "₹50,00,000",
-  property: {
-    address: "Shop No. 101, First Floor, Market Complex, Andheri East, Mumbai - 400069, Maharashtra",
-    type: "Commercial",
-    area: "1,500 sq.ft."
-  },
-  terms: "5 years at 8% interest rate",
-  documents: [
-    { name: "Mortgage Deed", number: "MD123456", date: "23 June 2024" },
-    { name: "Property Valuation Report", number: "PVR789012", date: "15 June 2024" }
-  ],
-  status: "Active",
-  source: "CERSAI"
-};
-
-const documentDetail = {
-  id: "4",
-  title: "Sale Deed",
-  number: "DOC45678",
-  executionDate: "18 April 2023",
-  registrationDate: "20 April 2023",
-  parties: {
-    seller: "John Doe",
-    buyer: "Jane Smith"
-  },
-  property: {
-    address: "Flat No. 202, Building A, Green Valley Apartments, Jayanagar, Bangalore - 560041, Karnataka",
-    type: "Residential",
-    area: "1,200 sq.ft."
-  },
-  consideration: "₹85,00,000",
-  stampDuty: "₹4,25,000",
-  registrationFee: "₹85,000",
-  documents: [
-    { name: "Sale Deed", pages: 12 },
-    { name: "Property Tax Receipt", pages: 2 },
-    { name: "NOC from Society", pages: 1 }
-  ],
-  source: "DORIS"
-};
-
 const DetailPage = () => {
   const { type, id } = useParams();
-  
-  // In a real app, we would fetch the data based on type and id
-  let detail;
-  switch(type) {
-    case "entity":
-      detail = entityDetail;
-      break;
-    case "property":
-      detail = propertyDetail;
-      break;
-    case "transaction":
-      detail = transactionDetail;
-      break;
-    case "document":
-      detail = documentDetail;
-      break;
-    default:
-      detail = null;
-  }
-  
+  const [detail, setDetail] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!type || !id) return;
+    setLoading(true);
+    setError(null);
+    let url = "";
+    switch (type) {
+      case "entity":
+        url = `/api/entities/${id}`;
+        break;
+      case "property":
+        url = `/api/properties/${id}`;
+        break;
+      case "transaction":
+        url = `/api/transactions/${id}`;
+        break;
+      case "document":
+        url = `/api/documents/${id}`;
+        break;
+      default:
+        setError("Invalid type");
+        setLoading(false);
+        return;
+    }
+    // Fix: Use full backend URL if running in browser (Vite dev server)
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      url = `http://localhost:5000${url}`;
+    }
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error("Not found");
+        return res.json();
+      })
+      .then((data) => setDetail(data))
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [type, id]);
+
   const handleExport = () => {
     const element = document.getElementById("detail-content");
     if (element) {
@@ -162,14 +91,19 @@ const DetailPage = () => {
     }
   };
   
-  if (!detail) {
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center text-lg">Loading...</div>
+    );
+  }
+  if (error || !detail) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
           <CardContent className="p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Detail Not Found</h2>
             <p className="text-muted-foreground mb-6">
-              The requested detail could not be found.
+              {error || "The requested detail could not be found."}
             </p>
             <Button onClick={() => window.history.back()}>Go Back</Button>
           </CardContent>
@@ -231,61 +165,58 @@ const DetailPage = () => {
                       </TabsList>
                       
                       <TabsContent value="overview" className="pt-4">
+                        {/* ENTITY: map backend fields */}
                         <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <dt className="text-sm text-muted-foreground">Company Type</dt>
+                            <dt className="text-sm text-muted-foreground">Name</dt>
+                            <dd>{detail.name}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Type</dt>
                             <dd>{detail.type}</dd>
                           </div>
                           <div>
-                            <dt className="text-sm text-muted-foreground">Status</dt>
-                            <dd>
-                              <Badge className="bg-green-100 text-green-800 border-green-200">
-                                {detail.status}
-                              </Badge>
-                            </dd>
+                            <dt className="text-sm text-muted-foreground">CIN</dt>
+                            <dd>{detail.cin || '-'}</dd>
                           </div>
                           <div>
-                            <dt className="text-sm text-muted-foreground">Incorporation Date</dt>
-                            <dd>{detail.incorporationDate}</dd>
+                            <dt className="text-sm text-muted-foreground">PAN</dt>
+                            <dd>{detail.pan || '-'}</dd>
                           </div>
                           <div>
-                            <dt className="text-sm text-muted-foreground">Registered Address</dt>
-                            <dd>{detail.registeredAddress}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Email</dt>
-                            <dd>{detail.email}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Authorized Capital</dt>
-                            <dd>{detail.authorizedCapital}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Paid Up Capital</dt>
-                            <dd>{detail.paidUpCapital}</dd>
+                            <dt className="text-sm text-muted-foreground">Registration Number</dt>
+                            <dd>{detail.registration_number || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">ID Type</dt>
-                            <dd>{detail.id_type || "-"}</dd>
+                            <dd>{detail.id_type || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Identification Number</dt>
-                            <dd>{detail.identification_number || "-"}</dd>
+                            <dd>{detail.identification_number || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Director Details</dt>
-                            <dd>{detail.director_details || "-"}</dd>
+                            <dd>{detail.director_details || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Company Status</dt>
-                            <dd>{detail.company_status || detail.status || "-"}</dd>
+                            <dd>{detail.company_status || '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Address</dt>
+                            <dd>{detail.address || '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Contact Info</dt>
+                            <dd>{detail.contact_info || '-'}</dd>
                           </div>
                         </dl>
                       </TabsContent>
                       
                       <TabsContent value="directors" className="pt-4">
                         <div className="space-y-4">
-                          {detail.directors.map((director, index) => (
+                          {detail.directors?.map((director, index) => (
                             <Card key={index}>
                               <CardContent className="p-4">
                                 <div className="flex justify-between items-start">
@@ -303,7 +234,7 @@ const DetailPage = () => {
                       
                       <TabsContent value="filings" className="pt-4">
                         <div className="space-y-4">
-                          {detail.filings.map((filing, index) => (
+                          {detail.filings?.map((filing, index) => (
                             <Card key={index}>
                               <CardContent className="p-4">
                                 <div className="flex justify-between items-start">
@@ -342,45 +273,50 @@ const DetailPage = () => {
                       </TabsList>
                       
                       <TabsContent value="overview" className="pt-4">
+                        {/* PROPERTY: map backend fields */}
                         <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <dt className="text-sm text-muted-foreground">Address</dt>
                             <dd>{detail.address}</dd>
                           </div>
                           <div>
+                            <dt className="text-sm text-muted-foreground">City</dt>
+                            <dd>{detail.city || '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">State</dt>
+                            <dd>{detail.state || '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Pincode</dt>
+                            <dd>{detail.pincode || '-'}</dd>
+                          </div>
+                          <div>
                             <dt className="text-sm text-muted-foreground">Type</dt>
-                            <dd>{detail.type}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Area</dt>
-                            <dd>{detail.area}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Registration Date</dt>
-                            <dd>{detail.registrationDate}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Current Owner</dt>
-                            <dd>{detail.currentOwner}</dd>
+                            <dd>{detail.property_type || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Registration Number</dt>
-                            <dd>{detail.registrationNumber || detail.registration_number || "-"}</dd>
+                            <dd>{detail.registration_number || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Survey/Khasra Number</dt>
-                            <dd>{detail.surveyNumber || detail.survey_number || "-"}</dd>
+                            <dd>{detail.survey_number || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">District</dt>
-                            <dd>{detail.district || "-"}</dd>
+                            <dd>{detail.district || '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Owner</dt>
+                            <dd>{detail.owner_name || '-'}</dd>
                           </div>
                         </dl>
                       </TabsContent>
                       
                       <TabsContent value="ownership" className="pt-4">
                         <div className="space-y-4">
-                          {detail.previousOwners.map((owner, index) => (
+                          {detail.previousOwners?.map((owner, index) => (
                             <Card key={index}>
                               <CardContent className="p-4">
                                 <div className="flex justify-between items-start">
@@ -397,7 +333,7 @@ const DetailPage = () => {
                       
                       <TabsContent value="encumbrances" className="pt-4">
                         <div className="space-y-4">
-                          {detail.encumbrances.map((encumbrance, index) => (
+                          {detail.encumbrances?.map((encumbrance, index) => (
                             <Card key={index}>
                               <CardContent className="p-4">
                                 <div className="flex justify-between items-start">
@@ -434,50 +370,35 @@ const DetailPage = () => {
                       </TabsList>
                       
                       <TabsContent value="overview" className="pt-4">
+                        {/* TRANSACTION: map backend fields */}
                         <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <dt className="text-sm text-muted-foreground">Transaction Type</dt>
+                            <dt className="text-sm text-muted-foreground">Type</dt>
                             <dd>{detail.type}</dd>
                           </div>
                           <div>
-                            <dt className="text-sm text-muted-foreground">Registration Number</dt>
-                            <dd>{detail.registrationNumber}</dd>
+                            <dt className="text-sm text-muted-foreground">Amount</dt>
+                            <dd>{detail.amount || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Date</dt>
-                            <dd>{detail.date}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Borrower</dt>
-                            <dd>{detail.borrower}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Lender</dt>
-                            <dd>{detail.lender}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Amount</dt>
-                            <dd>{detail.amount}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Terms</dt>
-                            <dd>{detail.terms}</dd>
-                          </div>
-                          <div>
-                            <dt className="text-sm text-muted-foreground">Status</dt>
-                            <dd>
-                              <Badge className="bg-green-100 text-green-800 border-green-200">
-                                {detail.status}
-                              </Badge>
-                            </dd>
+                            <dd>{detail.date ? new Date(detail.date).toLocaleDateString() : '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Description</dt>
-                            <dd>{detail.description || "-"}</dd>
+                            <dd>{detail.description || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Party Name</dt>
-                            <dd>{detail.party_name || "-"}</dd>
+                            <dd>{detail.party_name || detail.entity_name || '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Property Address</dt>
+                            <dd>{detail.property_address || '-'}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm text-muted-foreground">Property City</dt>
+                            <dd>{detail.property_city || '-'}</dd>
                           </div>
                         </dl>
                       </TabsContent>
@@ -488,15 +409,15 @@ const DetailPage = () => {
                             <dl className="space-y-2">
                               <div>
                                 <dt className="text-sm text-muted-foreground">Address</dt>
-                                <dd>{detail.property.address}</dd>
+                                <dd>{detail.property?.address || '-'}</dd>
                               </div>
                               <div>
                                 <dt className="text-sm text-muted-foreground">Type</dt>
-                                <dd>{detail.property.type}</dd>
+                                <dd>{detail.property?.type || '-'}</dd>
                               </div>
                               <div>
                                 <dt className="text-sm text-muted-foreground">Area</dt>
-                                <dd>{detail.property.area}</dd>
+                                <dd>{detail.property?.area || '-'}</dd>
                               </div>
                             </dl>
                           </CardContent>
@@ -505,7 +426,7 @@ const DetailPage = () => {
                       
                       <TabsContent value="documents" className="pt-4">
                         <div className="space-y-4">
-                          {detail.documents.map((document, index) => (
+                          {detail.documents?.map((document, index) => (
                             <Card key={index}>
                               <CardContent className="p-4">
                                 <div className="flex justify-between items-start">
@@ -539,6 +460,7 @@ const DetailPage = () => {
                       </TabsList>
                       
                       <TabsContent value="overview" className="pt-4">
+                        {/* DOCUMENT: map backend fields */}
                         <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <dt className="text-sm text-muted-foreground">Document Title</dt>
@@ -570,11 +492,11 @@ const DetailPage = () => {
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Registration Office</dt>
-                            <dd>{detail.registration_office || "-"}</dd>
+                            <dd>{detail.registration_office || '-'}</dd>
                           </div>
                           <div>
                             <dt className="text-sm text-muted-foreground">Filed By</dt>
-                            <dd>{detail.filed_by || "-"}</dd>
+                            <dd>{detail.filed_by || detail.entity_name || '-'}</dd>
                           </div>
                         </dl>
                       </TabsContent>
@@ -585,15 +507,15 @@ const DetailPage = () => {
                             <dl className="space-y-2">
                               <div>
                                 <dt className="text-sm text-muted-foreground">Address</dt>
-                                <dd>{detail.property.address}</dd>
+                                <dd>{detail.property?.address || '-'}</dd>
                               </div>
                               <div>
                                 <dt className="text-sm text-muted-foreground">Type</dt>
-                                <dd>{detail.property.type}</dd>
+                                <dd>{detail.property?.type || '-'}</dd>
                               </div>
                               <div>
                                 <dt className="text-sm text-muted-foreground">Area</dt>
-                                <dd>{detail.property.area}</dd>
+                                <dd>{detail.property?.area || '-'}</dd>
                               </div>
                             </dl>
                           </CardContent>
@@ -605,13 +527,13 @@ const DetailPage = () => {
                           <Card>
                             <CardContent className="p-4">
                               <h4 className="font-medium mb-2">Seller / Executant</h4>
-                              <p>{detail.parties.seller}</p>
+                              <p>{detail.parties?.seller || '-'}</p>
                             </CardContent>
                           </Card>
                           <Card>
                             <CardContent className="p-4">
                               <h4 className="font-medium mb-2">Buyer / Claimant</h4>
-                              <p>{detail.parties.buyer}</p>
+                              <p>{detail.parties?.buyer || '-'}</p>
                             </CardContent>
                           </Card>
                         </div>
