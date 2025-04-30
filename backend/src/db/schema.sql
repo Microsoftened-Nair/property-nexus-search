@@ -10,6 +10,10 @@ CREATE TABLE entities (
     cin VARCHAR(50),
     address TEXT,
     contact_info TEXT,
+    id_type VARCHAR(50), -- NEW: Aadhaar, PAN, etc.
+    identification_number VARCHAR(100), -- NEW
+    director_details TEXT, -- NEW: DIN/DPINs, comma-separated
+    company_status VARCHAR(50), -- NEW: Active, Inactive, etc.
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -23,6 +27,9 @@ CREATE TABLE properties (
     pincode VARCHAR(20),
     property_type VARCHAR(50), -- residential, commercial, industrial, etc.
     owner_entity_id INTEGER REFERENCES entities(id),
+    registration_number VARCHAR(100), -- NEW
+    survey_number VARCHAR(100), -- NEW
+    district VARCHAR(100), -- NEW
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -36,6 +43,8 @@ CREATE TABLE documents (
     doc_url TEXT,
     issued_at TIMESTAMP,
     expiry_at TIMESTAMP,
+    registration_office VARCHAR(100), -- NEW
+    filed_by VARCHAR(255), -- NEW
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -48,6 +57,8 @@ CREATE TABLE transactions (
     entity_id INTEGER REFERENCES entities(id),
     amount DECIMAL(15,2),
     date TIMESTAMP,
+    description TEXT, -- NEW
+    party_name VARCHAR(255), -- NEW
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
