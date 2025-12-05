@@ -1,7 +1,7 @@
 {
-  "name": "udaan-backend",
+  "name": "property-nexus-search-backend",
   "version": "1.0.0",
-  "description": "Backend for the UDAAN property search portal",
+  "description": "Backend API for Property Nexus Search - Unified portal integrating MCA, CERSAI, and DORIS databases for property and corporate records search",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
