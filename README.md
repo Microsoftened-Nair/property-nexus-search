@@ -1,6 +1,12 @@
-# Welcome to your Lovable project
+# Property Nexus Search
 
-## Project info
+> **Full-stack web application unifying MCA, CERSAI, and DORIS databases for comprehensive property and corporate records search across India**
+
+## Project Info
+
+**Title:** Property Search Portal
+
+**Description:** A unified search portal that integrates multiple Indian government databases (MCA - Ministry of Corporate Affairs, CERSAI - Central Registry of Security Interests, and DORIS - Digital Registry of Properties) providing seamless access to 50M+ property and corporate records in a single interface.
 
 **URL**: https://lovable.dev/projects/dafb0097-be49-454b-9685-6328ffb37650
 
@@ -50,15 +56,31 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## Key Features
 
-This project is built with:
+- **Unified Search Interface**: Search across multiple government databases simultaneously
+- **Multi-Database Integration**: MCA (Corporate Affairs), CERSAI (Security Interests), DORIS (Property Registry)
+- **Real-time Results**: Fast search across 50M+ records
+- **Detailed Records**: Access company registrations, property ownership, and security interests
+- **Modern UI**: Responsive design with advanced filtering capabilities
 
-- Vite
+## Technologies
+
+**Frontend:**
+- React 18
 - TypeScript
-- React
-- shadcn-ui
+- Vite
 - Tailwind CSS
+- shadcn-ui
+- TanStack Query
+- React Router
+
+**Backend:**
+- Node.js
+- Express.js
+- PostgreSQL
+- Winston (logging)
+- Helmet (security)
 
 ## How can I deploy this project?
 

@@ -1,7 +1,8 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "property-nexus-search",
+  "description": "Full-stack web application unifying MCA, CERSAI, and DORIS databases for comprehensive property and corporate records search across India",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
